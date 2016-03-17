@@ -7,6 +7,8 @@
 #include "libraries/DustSensor/DustSensor.h"
 #include "key.h"
 
+SerialDebugOutput debugOutput(9600, ALL_LEVEL);
+
 SYSTEM_MODE(MANUAL);
 
 DHT dht(D4, DHT22);
@@ -29,31 +31,33 @@ http_header_t headers[] = {
     { NULL, NULL } // NOTE: Always terminate headers will NULL
 };
 
-void connect_wifi(){
-    while(!WiFi.ready()){
-        WiFi.connect();
-        Serial.println("Connecting to Wifi...");
+void connect_cellular(){
+    Cellular.on();
+    while(!Cellular.ready()){
+        Cellular.connect();
+        Serial.println("Connecting to Cellular Network...");
         delay(500);
     }
 }
 
 void fix_connection(){
-    Serial.println("Fixing WiFi");
-    WiFi.disconnect();
+    Serial.println("Fixing Network Connection");
+    Cellular.disconnect();
     delay(1000);
-    WiFi.off();
+    Cellular.off();
     delay(1000);
-    WiFi.on();
+    Cellular.on();
     delay(1000);
-    connect_wifi();
+    connect_cellular();
 }
 
 void setup() {
     Serial.begin(9600);
     Serial.println("beginning");
     RGB.control(true);
-    RGB.brightness(5);
-    connect_wifi();
+    RGB.color(0, 255, 255);
+    RGB.brightness(255);
+    connect_cellular();
     Serial.println("running");
     Serial.println(request.path);
     String s_path = String("/api/"+API_VERSION+"/node/"+myIDStr+"/sensors");
@@ -76,7 +80,7 @@ void loop() {
     voc.read();
     dust.read();
     if (nextTime > millis()) return;
-    if(WiFi.ready()){
+    if(Cellular.ready()){
         char json_body[128];
         char body_out[128];
         sprintf(json_body, "{\"temperature\":%.2f, \"humidity\":%.2f, \"light\":%d , \"co2\":%d, \"voc\":%d, \"dust\":%.2f}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read());
@@ -84,13 +88,13 @@ void loop() {
         aes_128_encrypt(json_body, KEY, body_out);
         memcpy(request.body, body_out, 128);
         http.post(request, response, headers);
-        nextTime = millis() + 1000;
+        nextTime = millis() + 60000;
         Serial.print("Response status: ");
         Serial.println(response.status);
         if(response.status == -1){
             fix_connection();
         }
     }else{
-        connect_wifi();
+        connect_cellular();
     }
 }
