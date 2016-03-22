@@ -151,7 +151,7 @@ void HttpClient::request(http_request_t &aRequest, http_response_t &aResponse, h
     if (aRequest.body != NULL) {
         //char output[128];
         //aRequest.body.toCharArray(output, 128);
-        client.write((const uint8_t*)aRequest.body, 128);
+        client.write((const uint8_t*)aRequest.body, 96);
 
         #ifdef LOGGING
         Serial.println(aRequest.body);

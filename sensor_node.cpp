@@ -19,8 +19,9 @@ CO2Monitor co2;
 String myIDStr = Particle.deviceID();
 String API_VERSION = String("v1.0");
 HttpClient http;
+FuelGauge fuel;
 char path[64];
-char cookie[64];
+char cookie[32];
 
 http_request_t request;
 http_response_t response;
@@ -63,7 +64,7 @@ void setup() {
     String s_path = String("/api/"+API_VERSION+"/node/"+myIDStr+"/sensors");
     s_path.toCharArray(path, 64);
     String cook = String("lablog="+myIDStr);
-    cook.toCharArray(cookie, 64);
+    cook.toCharArray(cookie, 32);
     request.hostname = "crtlabsdev.realtors.org";
     request.port = 80;
     request.path = path;
@@ -75,20 +76,22 @@ void setup() {
 }
 
 unsigned int nextTime = 0;
+unsigned int next = 1800000;
 void loop() {
     light.read();
     voc.read();
     dust.read();
     if (nextTime > millis()) return;
+    nextTime = millis() + next;
     if(Cellular.ready()){
-        char json_body[128];
-        char body_out[128];
-        sprintf(json_body, "{\"temperature\":%.2f, \"humidity\":%.2f, \"light\":%d , \"co2\":%d, \"voc\":%d, \"dust\":%.2f}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read());
+        char json_body[96];
+        char body_out[96];
+        CellularSignal sig = Cellular.RSSI();
+        sprintf(json_body, "{\"t\":%.2f,\"h\":%.2f,\"l\":%d,\"c\":%d,\"v\":%d,\"d\":%.2f,\"f\":%.2f,\"n\":130, \"r\":%d}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read(), fuel.getSoC(), sig.rssi);
         Serial.println(json_body);
         aes_128_encrypt(json_body, KEY, body_out);
-        memcpy(request.body, body_out, 128);
+        memcpy(request.body, body_out, 96);
         http.post(request, response, headers);
-        nextTime = millis() + 60000;
         Serial.print("Response status: ");
         Serial.println(response.status);
         if(response.status == -1){
