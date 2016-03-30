@@ -1,0 +1,3 @@
+[submodule "libraries/CoAP"]
+	path = libraries/CoAP
+	url = git@github.com:hirotakaster/CoAP.git
