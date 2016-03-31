@@ -72,7 +72,7 @@ void loop() {
         char json_body[128];
         unsigned char body_out[256];
         CellularSignal sig = Cellular.RSSI();
-        sprintf(json_body, "{\"t\":%.2f,\"h\":%.2f,\"l\":%d,\"c\":%d,\"v\":%d,\"d\":%.2f,\"n\":130,\"i\":\"%s\",\"f\":%d,\"r\":%d}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read(), id, fuel.getSoC(), sig.rssi);
+        sprintf(json_body, "{\"t\":%.2f,\"h\":%.2f,\"l\":%d,\"c\":%d,\"v\":%d,\"d\":%.2f,\"n\":130,\"i\":\"%s\",\"f\":%.2f,\"r\":%d}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read(), id, fuel.getSoC(), sig.rssi);
         aes_128_encrypt(json_body, KEY, body_out);
         Serial.println(json_body);
         udp.beginPacket(ip, port);
