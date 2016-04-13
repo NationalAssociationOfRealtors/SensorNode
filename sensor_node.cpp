@@ -9,37 +9,35 @@
 
 SYSTEM_MODE(MANUAL);
 
-// An UDP instance to let us send and receive packets over UDP
 UDP udp;
-unsigned int port = 5005;
-IPAddress ip(192, 168, 1, 45);
+unsigned int port = 5683;
+IPAddress ip(63, 156, 247, 113);
 DHT dht(D4, DHT22);
 DustSensor dust(D6);
 AnalogSensor light(A0);
 AnalogSensor voc(A1);
 CO2Monitor co2;
+char id[36];
 String myIDStr = Particle.deviceID();
-char id[24];
-FuelGauge fuel;
 
-void connect_cellular(){
-    Cellular.on();
-    while(!Cellular.ready()){
-        Cellular.connect();
-        Serial.println("Connecting to Cellular Network...");
+void connect_wifi(){
+    WiFi.on();
+    while(!WiFi.ready()){
+        WiFi.connect();
+        Serial.println("Connecting to WiFi Network...");
         delay(500);
     }
 }
 
 void fix_connection(){
     Serial.println("Fixing Network Connection");
-    Cellular.disconnect();
+    WiFi.disconnect();
     delay(1000);
-    Cellular.off();
+    WiFi.off();
     delay(1000);
-    Cellular.on();
+    WiFi.on();
     delay(1000);
-    connect_cellular();
+    connect_wifi();
 }
 
 void setup() {
@@ -48,11 +46,10 @@ void setup() {
     RGB.control(true);
     RGB.color(0, 255, 255);
     RGB.brightness(255);
-    myIDStr.toCharArray(id, 24);
-    connect_cellular();
+    connect_wifi();
     Serial.println("running");
-    Serial.println("Setup Response Callback");
-    udp.begin(8008);
+    myIDStr.toCharArray(id, 36);
+    udp.begin(port);
     light.init();
     voc.init();
     co2.init();
@@ -61,25 +58,30 @@ void setup() {
 }
 
 unsigned int nextTime = 0;
-unsigned int next = 600000;//10 minutes
+unsigned int next = 1000;//1 second
 void loop() {
     light.read();
     voc.read();
     dust.read();
     if (nextTime > millis()) return;
     nextTime = millis() + next;
-    if(Cellular.ready()){
-        char json_body[128];
+    if(WiFi.ready()){
+        udp.stop();
+        udp.begin(port);
+        Serial.println(WiFi.localIP());
+        char json_body[160];
         unsigned char body_out[256];
-        CellularSignal sig = Cellular.RSSI();
-        sprintf(json_body, "{\"t\":%.2f,\"h\":%.2f,\"l\":%d,\"c\":%d,\"v\":%d,\"d\":%.2f,\"n\":130,\"i\":\"%s\",\"f\":%.2f,\"r\":%d}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read(), id, fuel.getSoC(), sig.rssi);
+        sprintf(json_body, "{\"t\":%.2f,\"h\":%.2f,\"l\":%.2f,\"c\":%.2f,\"v\":%d,\"d\":%d,\"n\":130.0,\"i\":\"%s\"}", dht.readTemperature(false), dht.readHumidity(), light.read(), co2.read(), voc.read(), dust.read(), id);
         aes_128_encrypt(json_body, KEY, body_out);
+        Serial.println(myIDStr);
+        Serial.println(id);
         Serial.println(json_body);
-        udp.beginPacket(ip, port);
-        int bytes = udp.write(body_out, 160);
-        udp.endPacket();
+        int bytes = udp.sendPacket(body_out, 160, ip, port);
+        if (bytes < 0) {
+            Serial.println("UDP Error");
+        }
         Serial.println(bytes);
     }else{
-        connect_cellular();
+        connect_wifi();
     }
 }
