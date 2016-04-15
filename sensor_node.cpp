@@ -11,8 +11,8 @@ SYSTEM_MODE(MANUAL);
 
 // An UDP instance to let us send and receive packets over UDP
 UDP udp;
-unsigned int port = 5005;
-IPAddress ip(192, 168, 1, 45);
+unsigned int port = 5683;
+IPAddress ip(63, 156, 247, 113);
 DHT dht(D4, DHT22);
 DustSensor dust(D6);
 AnalogSensor light(A0);
@@ -21,6 +21,13 @@ CO2Monitor co2;
 String myIDStr = Particle.deviceID();
 char id[24];
 FuelGauge fuel;
+unsigned int nextTime = 0;
+unsigned int next = 600000;//10 minutes
+unsigned int wait = 2000;//how long wait for ack packet before resending
+unsigned int wait_packet = 0;
+unsigned int attempts = 0;
+bool sent = false;
+bool response = false;
 
 void connect_cellular(){
     Cellular.on();
@@ -51,8 +58,7 @@ void setup() {
     myIDStr.toCharArray(id, 24);
     connect_cellular();
     Serial.println("running");
-    Serial.println("Setup Response Callback");
-    udp.begin(8008);
+    udp.begin(port);
     light.init();
     voc.init();
     co2.init();
@@ -60,15 +66,21 @@ void setup() {
     dust.begin();
 }
 
-unsigned int nextTime = 0;
-unsigned int next = 600000;//10 minutes
-void loop() {
-    light.read();
-    voc.read();
-    dust.read();
-    if (nextTime > millis()) return;
-    nextTime = millis() + next;
+bool check_packet(){
+    if(udp.parsePacket() > 0){
+        char ack = udp.read();
+        Serial.print("ACK: "); Serial.println(ack);
+        udp.flush();
+        return true;
+    }
+    return false;
+}
+
+void send_packet(){
     if(Cellular.ready()){
+        light.read();
+        voc.read();
+        dust.read();
         char json_body[128];
         unsigned char body_out[256];
         CellularSignal sig = Cellular.RSSI();
@@ -79,7 +91,30 @@ void loop() {
         int bytes = udp.write(body_out, 160);
         udp.endPacket();
         Serial.println(bytes);
+        wait_packet = millis()+wait;
+        attempts++;
+        if(attempts > 10){
+            fix_connection();
+            attempts = 0;
+        }
     }else{
         connect_cellular();
     }
+}
+
+void loop() {
+    if(sent && !response && check_packet()){
+        sent = false;
+        response = true;
+        attempts = 0;
+        Serial.println("ACK received!");
+    }else if(sent && !response && (millis() > wait_packet)){
+        Serial.println("No ACK: resend");
+        send_packet();
+    }
+    if (nextTime > millis()) return;
+    send_packet();
+    sent = true;
+    response = false;
+    nextTime = millis() + next;
 }
