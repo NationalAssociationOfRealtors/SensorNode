@@ -49,7 +49,7 @@
 #ifndef TROPICSSL_BN_MUL_H
 #define TROPICSSL_BN_MUL_H
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_HAVE_ASM)
 

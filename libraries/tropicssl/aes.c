@@ -39,12 +39,12 @@
  *  http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
  */
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_AES_C)
 
-#include "tropicssl/aes.h"
-#include "tropicssl/padlock.h"
+#include "aes.h"
+#include "padlock.h"
 
 #include <string.h>
 

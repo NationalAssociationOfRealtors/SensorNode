@@ -39,11 +39,11 @@
  *	http://www.cacr.math.uwaterloo.ca/hac/about/chap8.pdf
  */
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_RSA_C)
 
-#include "tropicssl/rsa.h"
+#include "rsa.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -559,7 +559,7 @@ void rsa_free(rsa_context * ctx)
 
 #if defined(TROPICSSL_SELF_TEST)
 
-#include "tropicssl/sha1.h"
+#include "sha1.h"
 
 /*
  * Example RSA-1024 keypair, for test purposes

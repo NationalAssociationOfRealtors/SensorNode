@@ -41,12 +41,12 @@
  *	http://math.libtomcrypt.com/files/tommath.pdf
  */
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_BIGNUM_C)
 
-#include "tropicssl/bignum.h"
-#include "tropicssl/bn_mul.h"
+#include "bignum.h"
+#include "bn_mul.h"
 
 #include <string.h>
 #include <stdlib.h>

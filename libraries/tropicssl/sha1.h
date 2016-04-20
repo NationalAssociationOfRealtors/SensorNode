@@ -59,9 +59,9 @@ extern "C" {
 	void sha1_starts(sha1_context * ctx);
 
 	/**
-	 * \brief          SHA-1 process buffer
 	 *
 	 * \param ctx      SHA-1 context
+	 * \brief          SHA-1 process buffer
 	 * \param input    buffer holding the  data
 	 * \param ilen     length of the input data
 	 */

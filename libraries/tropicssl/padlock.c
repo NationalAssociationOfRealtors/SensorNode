@@ -39,12 +39,12 @@
  *  programming_guide.pdf
  */
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_PADLOCK_C)
 
-#include "tropicssl/aes.h"
-#include "tropicssl/padlock.h"
+#include "aes.h"
+#include "padlock.h"
 
 #if defined(TROPICSSL_HAVE_X86)
 

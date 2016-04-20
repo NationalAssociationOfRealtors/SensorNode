@@ -35,7 +35,7 @@
 #ifndef TROPICSSL_PADLOCK_H
 #define TROPICSSL_PADLOCK_H
 
-#include "tropicssl/aes.h"
+#include "aes.h"
 
 #if (defined(__GNUC__) && defined(__i386__))
 

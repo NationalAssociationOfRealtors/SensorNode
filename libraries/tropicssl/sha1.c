@@ -38,11 +38,11 @@
  *	http://www.itl.nist.gov/fipspubs/fip180-1.htm
  */
 
-#include "tropicssl/config.h"
+#include "config.h"
 
 #if defined(TROPICSSL_SHA1_C)
 
-#include "tropicssl/sha1.h"
+#include "sha1.h"
 
 #include <string.h>
 #include <stdio.h>
