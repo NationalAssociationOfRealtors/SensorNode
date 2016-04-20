@@ -9,7 +9,7 @@
 
 SYSTEM_MODE(MANUAL);
 
-// An UDP instance to let us send and receive packets over UDP
+// A UDP instance to let us send and receive packets over UDP
 UDP udp;
 unsigned int port = 5683;
 IPAddress ip(63, 156, 247, 113);
@@ -23,7 +23,7 @@ char id[24];
 FuelGauge fuel;
 unsigned int nextTime = 0;
 unsigned int next = 600000;//10 minutes
-unsigned int wait = 2000;//how long wait for ack packet before resending
+unsigned int wait = 10000;//how long wait for ack packet before resending
 unsigned int wait_packet = 0;
 unsigned int attempts = 0;
 bool sent = false;
@@ -40,13 +40,7 @@ void connect_cellular(){
 
 void fix_connection(){
     Serial.println("Fixing Network Connection");
-    Cellular.disconnect();
-    delay(1000);
-    Cellular.off();
-    delay(1000);
-    Cellular.on();
-    delay(1000);
-    connect_cellular();
+    System.sleep(SLEEP_MODE_DEEP, 60);
 }
 
 void setup() {
@@ -95,7 +89,6 @@ void send_packet(){
         attempts++;
         if(attempts > 10){
             fix_connection();
-            attempts = 0;
         }
     }else{
         connect_cellular();
