@@ -1,6 +1,6 @@
 #include "application.h"
-#include "tropicssl/rsa.h"
 #include "tropicssl/aes.h"
+#include "tropicssl/rsa.h"
 #include "AES.h"
 // PKCS #7 padding
 // Do this before encrypting to get the message
