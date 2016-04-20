@@ -26,8 +26,10 @@ unsigned int next = 600000;//10 minutes
 unsigned int wait = 10000;//how long wait for ack packet before resending
 unsigned int wait_packet = 0;
 unsigned int attempts = 0;
+unsigned int max_attempts = 5;
 bool sent = false;
 bool response = false;
+
 
 void connect_cellular(){
     Cellular.on();
@@ -39,7 +41,7 @@ void connect_cellular(){
 }
 
 void fix_connection(){
-    Serial.println("Fixing Network Connection");
+    Serial.println("Resetting Network Stack");
     System.sleep(SLEEP_MODE_DEEP, 60);
 }
 
@@ -51,8 +53,8 @@ void setup() {
     RGB.brightness(255);
     myIDStr.toCharArray(id, 24);
     connect_cellular();
-    Serial.println("running");
     udp.begin(port);
+    Serial.println("running");
     light.init();
     voc.init();
     co2.init();
@@ -87,7 +89,7 @@ void send_packet(){
         Serial.println(bytes);
         wait_packet = millis()+wait;
         attempts++;
-        if(attempts > 10){
+        if(attempts > max_attempts){
             fix_connection();
         }
     }else{
