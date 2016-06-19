@@ -3,7 +3,6 @@
 #include "libraries/AnalogSensor/AnalogSensor.h"
 #include "libraries/DHT/DHT.h"
 #include "libraries/CO2Monitor/CO2Monitor.h"
-#include "libraries/HttpClient/HttpClient.h"
 #include "libraries/DustSensor/DustSensor.h"
 #include "key.h"
 
@@ -12,7 +11,7 @@ SYSTEM_MODE(MANUAL);
 // A UDP instance to let us send and receive packets over UDP
 UDP udp;
 unsigned int port = 5683;
-IPAddress ip(63, 156, 247, 113);
+IPAddress ip(199, 223, 216, 35);
 DHT dht(D4, DHT22);
 DustSensor dust(D6);
 AnalogSensor light(A0);
